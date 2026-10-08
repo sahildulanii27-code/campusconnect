@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- AUTH STATE (hidden initially) -->
+    <div id="auth-overlay" class="auth-overlay active">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>CampusConnect</h1>
+                <p>VESIT's Peer Learning Hub</p>
+            </div>
+            <form class="auth-form" onsubmit="handleLogin(event)">
+                <input type="text" id="auth-name" placeholder="Your Name" required class="auth-input">
+                <input type="email" id="auth-email" placeholder="name@vesit.ac.in" required class="auth-input">
+                <select id="auth-year" class="auth-input" required>
+                    <option value="">Select Year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                </select>
+                <button type="submit" class="auth-btn">Enter Campus</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app" class="app hidden">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1 class="logo">𝐂𝐚𝐦𝐩𝐮𝐬𝐂𝐨𝐧𝐧𝐞𝐜𝐭</h1>
+                    <p class="tagline">Knowledge. Community. Growth.</p>
+                </div>
+                <nav class="nav-tabs">
+                    <button class="nav-tab active" onclick="switchTab('qa')">
+                        <span class="icon">💬</span> Q&A
+                    </button>
+                    <button class="nav-tab" onclick="switchTab('marketplace')">
+                        <span class="icon">🛒</span> Marketplace
+                    </button>
+                    <button class="nav-tab" onclick="switchTab('profile')">
+                        <span class="icon">👤</span> Profile
+                    </button>
+                    <button class="nav-tab logout" onclick="handleLogout()">
+                        <span class="icon">🚪</span> Logout
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content">
+            <!-- Q&A TAB -->
+            <section id="qa-tab" class="tab-content active">
+                <div class="qa-header">
+                    <h2>Anonymous Q&A</h2>
+                    <p class="subtitle">Ask anything. Learn from seniors. Help your juniors.</p>
+                </div>
+
+                <!-- FILTERS & SEARCH -->
+                <div class="controls-panel">
+                    <div class="search-wrapper">
+                        <input 
+                            type="text" 
+                            id="qa-search" 
+                            placeholder="Search by keyword..." 
+                            class="search-input"
+                            onkeyup="filterQA()"
+                        >
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <select id="subject-filter" class="filter-dropdown" onchange="filterQA()">
+                        <option value="">All Subjects</option>
+                        <option value="Maths-I">Maths-I</option>
+                        <option value="C Programming">C Programming</option>
+                        <option value="DSA">DSA</option>
+                        <option value="Engineering Graphics">Engineering Graphics</option>
+                    </select>
+                </div>
+
+                <!-- POST QUESTION BUTTON -->
+                <button class="cta-btn" onclick="toggleQAForm()">
+                    <span>+</span> Ask Question Anonymously
+                </button>
+
+                <!-- QUESTION FORM -->
+                <form id="qa-form" class="form-container hidden" onsubmit="postQuestion(event)">
+                    <h3>Your Question</h3>
+                    <input 
+                        type="text" 
+                        id="q-title" 
+                        placeholder="What's your doubt?" 
+                        required 
+                        class="form-input"
+                    >
+                    <textarea 
+                        id="q-body" 
+                        placeholder="Provide more details..." 
+                        class="form-textarea"
+                        required
+                    ></textarea>
+                    <select id="q-subject" class="form-input" required>
+                        <option value="">Subject</option>
+                        <option value="Maths-I">Maths-I</option>
+                        <option value="C Programming">C Programming</option>
+                        <option value="DSA">DSA</option>
+                        <option value="Engineering Graphics">Engineering Graphics</option>
+                    </select>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Post</button>
+                        <button type="button" class="btn-secondary" onclick="toggleQAForm()">Cancel</button>
+                    </div>
+                </form>
+
+                <!-- QUESTIONS LIST -->
+                <div id="qa-list" class="posts-grid">
+                    <!-- Posts rendered here -->
+                </div>
+            </section>
+
+            <!-- MARKETPLACE TAB -->
+            <section id="marketplace-tab" class="tab-content">
+                <div class="marketplace-header">
+                    <h2>Resource Marketplace</h2>
+                    <p class="subtitle">Buy, sell, donate textbooks & resources. Save ₹5000+/year.</p>
+                </div>
+
+                <button class="cta-btn" onclick="toggleMarketplaceForm()">
+                    <span>+</span> List Your Item
+                </button>
+
+                <!-- MARKETPLACE FORM -->
+                <form id="marketplace-form" class="form-container hidden" onsubmit="postMarketplace(event)">
+                    <h3>Sell or Donate</h3>
+                    <input 
+                        type="text" 
+                        id="m-name" 
+                        placeholder="Item name (e.g., C Programming Book)" 
+                        required 
+                        class="form-input"
+                    >
+                    <select id="m-category" class="form-input" required>
+                        <option value="">Category</option>
+                        <option value="Textbooks">Textbooks</option>
+                        <option value="Calculators">Calculators</option>
+                        <option value="Notes">Study Notes</option>
+                        <option value="Lab Equipment">Lab Equipment</option>
+                    </select>
+                    <input 
+                        type="number" 
+                        id="m-price" 
+                        placeholder="Price (₹) - Leave 0 for donation" 
+                        required 
+                        class="form-input"
+                    >
+                    <textarea 
+                        id="m-desc" 
+                        placeholder="Condition, edition, details..." 
+                        class="form-textarea"
+                        required
+                    ></textarea>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">List Item</button>
+                        <button type="button" class="btn-secondary" onclick="toggleMarketplaceForm()">Cancel</button>
+                    </div>
+                </form>
+
+                <!-- MARKETPLACE ITEMS -->
+                <div id="marketplace-list" class="marketplace-grid">
+                    <!-- Items rendered here -->
+                </div>
+            </section>
+
+            <!-- PROFILE TAB -->
+            <section id="profile-tab" class="tab-content">
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="avatar">👤</div>
+                            <div class="profile-info">
+                                <h2 id="p-name">User Name</h2>
+                                <p id="p-email">email@vesit.ac.in</p>
+                                <span id="p-year" class="year-badge">1st Year</span>
+                            </div>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat-box">
+                                <h3 id="stat-questions">0</h3>
+                                <p>Questions</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3 id="stat-items">0</h3>
+                                <p>Items Listed</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3 id="stat-upvotes">0</h3>
+                                <p>Upvotes</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3 id="stat-reputation">⭐</h3>
+                                <p>Reputation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>CampusConnect © 2026 | Built for VESIT Students | Force Awakens 1.0</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
