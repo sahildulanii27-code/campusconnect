@@ -505,3 +505,37 @@ renderAll = function () { _renderAll4(); renderAlumni(); };
 persist();
 renderAlumni();
 renderProfile();
+/* ===== HOME HERO PANEL ===== */
+(function () {
+  function gearPath(teeth, ro, ri, rh) {
+    const step = 2 * Math.PI / teeth;
+    const pt = (r, a) => (r * Math.cos(a)).toFixed(1) + "," + (r * Math.sin(a)).toFixed(1);
+    let d = "";
+    for (let i = 0; i < teeth; i++) {
+      const a = i * step;
+      d += (i ? "L" : "M") + pt(ri, a) + " L" + pt(ro, a + step * 0.15) + " L" + pt(ro, a + step * 0.4) + " L" + pt(ri, a + step * 0.55) + " ";
+    }
+    return d + "Z M" + rh + ",0 A" + rh + "," + rh + " 0 1 0 " + (-rh) + ",0 A" + rh + "," + rh + " 0 1 0 " + rh + ",0 Z";
+  }
+  function gear(x, y, teeth, ro, ri, rh, dur, rev, color) {
+    return '<g transform="translate(' + x + ',' + y + ')"><g>' +
+      '<animateTransform attributeName="transform" type="rotate" from="' + (rev ? 360 : 0) + '" to="' + (rev ? 0 : 360) + '" dur="' + dur + 's" repeatCount="indefinite"/>' +
+      '<path d="' + gearPath(teeth, ro, ri, rh) + '" fill="' + color + '" fill-opacity=".14" stroke="' + color + '" stroke-width="2" stroke-linejoin="round" fill-rule="evenodd"/>' +
+      '<circle r="' + (ri * 0.62).toFixed(1) + '" fill="none" stroke="' + color + '" stroke-opacity=".55" stroke-dasharray="4 5"/>' +
+      '</g></g>';
+  }
+  const svg = '<svg viewBox="0 0 420 330" xmlns="http://www.w3.org/2000/svg">' +
+    gear(150, 215, 16, 95, 80, 18, 14, false, "#FFD700") +
+    gear(257, 125, 10, 60, 47, 12, 8.75, true, "#22d3ee") +
+    gear(344, 157, 8, 44, 34, 9, 7, false, "#b8a6ff") +
+    '</svg>';
+  const hero = document.createElement("div");
+  hero.className = "hero";
+  hero.innerHTML =
+    '<div class="hero-stage"><div class="orbit"><span>💻</span><span>🧪</span><span>📚</span><span>📐</span></div>' + svg + '</div>' +
+    '<h2>Learn. Connect. Build.</h2>' +
+    "<p>VESIT's peer-powered campus hub for first-years, seniors and alumni.</p>" +
+    '<div class="hero-chips"><span>💬 Q&amp;A</span><span>🛒 Marketplace</span><span>👥 Study Groups</span><span>⏱️ Focus Room</span><span>🚆 Train Buddies</span><span>📚 Notes</span><span>🎓 Alumni</span></div>';
+  const ov = $("auth-overlay");
+  ov.insertBefore(hero, ov.querySelector(".auth-container"));
+})();
