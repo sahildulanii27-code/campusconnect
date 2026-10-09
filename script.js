@@ -1,4 +1,40 @@
 /* CampusConnect - script.js v3 */
+const STUDENT_YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+
+function onYearChange() {
+  const y = document.getElementById("auth-year").value;
+  const email = document.getElementById("auth-email");
+  const li = document.getElementById("auth-linkedin");
+  const isStudent = STUDENT_YEARS.includes(y);
+  const isAlumni = y === "Alumni";
+
+  email.style.display = isStudent ? "" : "none";
+  email.required = isStudent;
+  if (!isStudent) email.value = "";
+
+  li.style.display = isAlumni ? "" : "none";
+  li.required = isAlumni;
+  if (!isAlumni) li.value = "";
+  showAuthError("");
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById("auth-error");
+  el.textContent = msg;
+  el.style.display = msg ? "block" : "none";
+}
+
+function validateAuth() {
+  const year = document.getElementById("auth-year").value;
+  const email = document.getElementById("auth-email").value.trim();
+  const linkedin = document.getElementById("auth-linkedin").value.trim();
+
+  if (STUDENT_YEARS.includes(year) && !/^[a-z0-9._%+-]+@ves\.ac\.in$/i.test(email))
+    return "Students must use their @ves.ac.in email.";
+  if (year === "Alumni" && !/^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/in\/[\w%-]+\/?$/i.test(linkedin))
+    return "Enter a valid LinkedIn profile link (linkedin.com/in/...).";
+  return "";
+}
 const STORE = "cc_v3";
 const SEED = {
   user: null,
