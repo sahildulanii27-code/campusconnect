@@ -679,3 +679,52 @@ renderProfile();
   renderAll = function () { _ra(); refresh(); };
   refresh();
 })();
+/* ===== CLOUD BACKEND (Firebase Firestore) ===== */
+const FB = {
+  apiKey: "AIzaSyAYkBxXUQHuzVPAQBKmeOlY1--SC2xN7go",
+  authDomain: "campus-connect-11e1d.firebaseapp.com",
+  projectId: "campus-connect-11e1d",
+  storageBucket: "campus-connect-11e1d.firebasestorage.app",
+  messagingSenderId: "7752779643",
+  appId: "1:7752779643:web:68708b5919b74864775fde"
+};
+(function () {
+  if (!window.firebase || !FB.apiKey) return;
+  firebase.initializeApp(FB);
+  const ref = firebase.firestore().collection("campusconnect").doc("shared");
+  const KEYS = ["questions", "items", "groups", "trains", "notes", "alumni", "reqs", "log"];
+  let ready = false, applying = false, lastSent = "";
+  const _persist = persist;
+  function pack() {
+    const o = {};
+    KEYS.forEach(function (k) { o[k] = JSON.parse(JSON.stringify(S[k] || [])); });
+    o.notes.forEach(function (n) { if (n.file) n.file = null; });
+    o.focus = (S.focus && S.focus.mins) || {};
+    return JSON.stringify(o);
+  }
+  persist = function () {
+    _persist();
+    if (!ready || applying) return;
+    const s = pack();
+    if (s === lastSent) return;
+    lastSent = s;
+    ref.set({ data: s, t: Date.now() }).catch(function (e) { console.error("Cloud save failed", e); });
+  };
+  ref.onSnapshot(function (doc) {
+    if (!doc.exists) { ready = true; persist(); return; }
+    const raw = doc.data().data;
+    if (raw === lastSent) { ready = true; return; }
+    applying = true;
+    const d = JSON.parse(raw), files = {};
+    (S.notes || []).forEach(function (n) { if (n.file) files[n.id] = n.file; });
+    KEYS.forEach(function (k) { if (d[k]) S[k] = d[k]; });
+    (S.notes || []).forEach(function (n) { if (files[n.id]) n.file = files[n.id]; });
+    if (d.focus) { S.focus = S.focus || { mins: {} }; S.focus.mins = d.focus; }
+    lastSent = raw;
+    _persist();
+    ready = true;
+    applying = false;
+    const ae = document.activeElement;
+    if (S.user && !(ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName))) renderAll();
+  }, function (e) { console.error("Cloud read failed", e); });
+})();
