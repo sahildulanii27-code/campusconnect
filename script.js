@@ -539,3 +539,143 @@ renderProfile();
   const ov = $("auth-overlay");
   ov.insertBefore(hero, ov.querySelector(".auth-container"));
 })();
+/* ===== BADGES + MENU DRAWER ===== */
+const TIERS = [
+  { min: 0, name: "Newbie", icon: "🌱", color: "#9aa6bf" },
+  { min: 10, name: "Contributor", icon: "🎓", color: "#7ee0a0" },
+  { min: 50, name: "Scholar", icon: "⭐", color: "#38bdf8" },
+  { min: 100, name: "Mentor", icon: "🏆", color: "#FFD700" },
+  { min: 250, name: "Legend", icon: "👑", color: "#ff7ad9" }
+];
+function tierOf(r) { let t = TIERS[0]; TIERS.forEach(function (x) { if (r >= x.min) t = x; }); return t; }
+badgeOf = function (email) {
+  const t = tierOf(repOf(email));
+  return `<span class="badge" style="color:${t.color};border-color:${t.color}">${t.icon} ${t.name}</span>`;
+};
+function statsOf(email) {
+  const myQ = S.questions.filter(q => q.email === email);
+  const myA = S.questions.flatMap(q => q.answers).filter(a => a.email === email);
+  return {
+    answers: myA.length,
+    upv: myQ.reduce((s, q) => s + q.votes, 0) + myA.reduce((s, a) => s + a.votes, 0),
+    notes: (S.notes || []).filter(n => n.email === email).length,
+    focus: (S.focus && S.focus.mins[email]) ? S.focus.mins[email].min : 0
+  };
+}
+const ACH = [
+  { icon: "🎯", name: "First Answer", desc: "Post 1 answer", ok: (s) => s.answers >= 1 },
+  { icon: "🙌", name: "Helper", desc: "Post 10 answers", ok: (s) => s.answers >= 10 },
+  { icon: "👍", name: "Appreciated", desc: "Get 10 upvotes", ok: (s) => s.upv >= 10 },
+  { icon: "📚", name: "Sharer", desc: "Share 3 notes", ok: (s) => s.notes >= 3 },
+  { icon: "⏱️", name: "Focused", desc: "Focus 60 minutes", ok: (s) => s.focus >= 60 },
+  { icon: "⭐", name: "Rising Star", desc: "Reach 50 reputation", ok: (s, r) => r >= 50 }
+];
+const _rpBadge = renderProfile;
+renderProfile = function () {
+  _rpBadge();
+  const u = S.user; if (!u) return;
+  const r = repOf(u.email), t = tierOf(r), s = statsOf(u.email);
+  const nx = TIERS[TIERS.indexOf(t) + 1];
+  const pct = nx ? Math.min(100, Math.round((r - t.min) / (nx.min - t.min) * 100)) : 100;
+  const host = document.querySelector(".profile-container");
+  let card = $("badge-card");
+  if (!card) { card = document.createElement("div"); card.id = "badge-card"; host.insertBefore(card, host.firstChild); }
+  card.innerHTML = `
+    <div class="medal" style="--c:${t.color}">
+      <div class="medal-ring">${t.icon}</div>
+      <div class="medal-info">
+        <div class="medal-tier">${t.name}</div>
+        <div class="medal-rep">${r} reputation points</div>
+        <div class="bar"><div style="width:${pct}%"></div></div>
+        <div class="meta">${nx ? (nx.min - r) + " more points to reach " + nx.icon + " " + nx.name : "Top level reached!"}</div>
+      </div>
+    </div>
+    <div class="ladder">${TIERS.map(x => `<span class="${r >= x.min ? "got" : ""} ${x === t ? "cur" : ""}" style="--c:${x.color}">${x.icon} ${x.name} <i>${x.min}+</i></span>`).join("")}</div>
+    <div class="ach-grid">${ACH.map(a => `<div class="ach ${a.ok(s, r) ? "on" : ""}"><span>${a.icon}</span><b>${a.name}</b><small>${a.desc}</small></div>`).join("")}</div>`;
+  const av = document.querySelector(".avatar"); if (av) av.textContent = t.icon;
+};
+
+(function () {
+  const nav = document.querySelector(".nav-tabs"), hc = document.querySelector(".header-content");
+  if (!nav || !hc) return;
+  const map = {}; let logout = null;
+  Array.from(nav.querySelectorAll(".nav-tab")).forEach(function (b) {
+    if (b.classList.contains("logout")) { logout = b; return; }
+    const m = (b.getAttribute("onclick") || "").match(/switchTab\('(\w+)'\)/);
+    if (m) map[m[1]] = b;
+  });
+  nav.innerHTML = "";
+  const title = document.createElement("div");
+  title.className = "drawer-title"; title.textContent = "⚙ CampusConnect";
+  nav.appendChild(title);
+  [["Learn", ["qa", "notes", "focus"]], ["Community", ["marketplace", "groups", "train", "alumni"]], ["Me", ["profile"]]].forEach(function (g) {
+    const h = document.createElement("div");
+    h.className = "nav-group"; h.textContent = g[0]; nav.appendChild(h);
+    g[1].forEach(function (k) { if (map[k]) nav.appendChild(map[k]); });
+  });
+  if (logout) nav.appendChild(logout);
+  document.body.appendChild(nav);
+  const back = document.createElement("div"); back.id = "menu-back"; document.body.appendChild(back);
+  const btn = document.createElement("button"); btn.className = "menu-btn"; btn.textContent = "☰ Menu"; hc.appendChild(btn);
+  function close() { nav.classList.remove("open"); back.classList.remove("open"); }
+  btn.onclick = function () { nav.classList.add("open"); back.classList.add("open"); };
+  back.onclick = close;
+  nav.addEventListener("click", function (e) { if (e.target.closest(".nav-tab")) close(); });
+  const NAMES = { qa: "Q&A", marketplace: "Marketplace", groups: "Study Groups", focus: "Focus Room", train: "Train Buddies", notes: "Notes & Papers", alumni: "Alumni", profile: "Profile" };
+  const _st = switchTab;
+  switchTab = function (n) { _st(n); btn.textContent = "☰ " + (NAMES[n] || "Menu"); };
+})();
+
+renderProfile();
+/* ===== TAB STRIP ===== */
+(function () {
+  const header = document.querySelector(".header"), mb = document.querySelector(".menu-btn");
+  if (!header) return;
+  const TABS = [["qa", "💬", "Q&A"], ["notes", "📚", "Notes"], ["focus", "⏱️", "Focus"], ["marketplace", "🛒", "Market"], ["groups", "👥", "Groups"], ["train", "🚆", "Train"], ["alumni", "🎓", "Alumni"], ["profile", "👤", "Profile"]];
+  const strip = document.createElement("div");
+  strip.className = "tabstrip";
+  strip.innerHTML = TABS.map(t => `<button data-t="${t[0]}">${t[1]} ${t[2]}</button>`).join("");
+  header.appendChild(strip);
+  function mark(n) {
+    strip.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === n));
+    const on = strip.querySelector("button.on");
+    if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
+    if (mb) mb.textContent = "☰ Menu";
+  }
+  strip.addEventListener("click", function (e) {
+    const b = e.target.closest("button");
+    if (b) switchTab(b.dataset.t);
+  });
+  const _st2 = switchTab;
+  switchTab = function (n) { _st2(n); mark(n); };
+  mark("qa");
+})();
+/* ===== PROFILE BUTTON AFTER MENU ===== */
+(function () {
+  const hc = document.querySelector(".header-content"), mb = document.querySelector(".menu-btn"), nav = document.querySelector(".nav-tabs");
+  if (!hc || !mb) return;
+  if (nav) {
+    const p = Array.from(nav.querySelectorAll(".nav-tab")).find(b => (b.getAttribute("onclick") || "").includes("'profile'"));
+    if (p) p.remove();
+    const g = Array.from(nav.querySelectorAll(".nav-group")).find(x => x.textContent.trim() === "Me");
+    if (g) g.textContent = "Account";
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "hdr-actions";
+  hc.appendChild(wrap);
+  wrap.appendChild(mb);
+  const pb = document.createElement("button");
+  pb.className = "profile-btn";
+  pb.innerHTML = '<span>👤</span><span class="nm">Profile</span>';
+  pb.onclick = function () { switchTab("profile"); };
+  wrap.appendChild(pb);
+  function refresh() {
+    if (!S.user || typeof tierOf !== "function") return;
+    pb.innerHTML = "<span>" + tierOf(repOf(S.user.email)).icon + '</span><span class="nm">Profile</span>';
+  }
+  const _st3 = switchTab;
+  switchTab = function (n) { _st3(n); pb.classList.toggle("on", n === "profile"); refresh(); };
+  const _ra = renderAll;
+  renderAll = function () { _ra(); refresh(); };
+  refresh();
+})();
