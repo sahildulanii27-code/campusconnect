@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- AUTH STATE (hidden initially) -->
     <div id="auth-overlay" class="auth-overlay active">
         <div class="auth-container">
             <div class="auth-header">
@@ -22,57 +21,121 @@
                     <option value="1st Year">1st Year</option>
                     <option value="2nd Year">2nd Year</option>
                     <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                    <option value="Alumni">Alumni</option>
                 </select>
                 <button type="submit" class="auth-btn">Enter Campus</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="app" class="app hidden">
-        <!-- HEADER -->
         <header class="header">
             <div class="header-content">
                 <div class="logo-section">
-                    <h1 class="logo">𝐂𝐚𝐦𝐩𝐮𝐬𝐂𝐨𝐧𝐧𝐞𝐜𝐭</h1>
+                    <h1 class="logo">CampusConnect</h1>
                     <p class="tagline">Knowledge. Community. Growth.</p>
                 </div>
                 <nav class="nav-tabs">
-                    <button class="nav-tab active" onclick="switchTab('qa')">
-                        <span class="icon">💬</span> Q&A
-                    </button>
-                    <button class="nav-tab" onclick="switchTab('marketplace')">
-                        <span class="icon">🛒</span> Marketplace
-                    </button>
-                    <button class="nav-tab" onclick="switchTab('profile')">
-                        <span class="icon">👤</span> Profile
-                    </button>
-                    <button class="nav-tab logout" onclick="handleLogout()">
-                        <span class="icon">🚪</span> Logout
-                    </button>
+                    <button class="nav-tab active" onclick="switchTab('qa')"><span class="icon">💬</span> Q&A</button>
+                    <button class="nav-tab" onclick="switchTab('marketplace')"><span class="icon">🛒</span> Marketplace</button>
+                    <button class="nav-tab" onclick="switchTab('groups')"><span class="icon">👥</span> Study Groups</button>
+                    <button class="nav-tab" onclick="switchTab('profile')"><span class="icon">👤</span> Profile</button>
+                    <button class="nav-tab" onclick="switchTab('focus')"><span class="icon">⏱️</span> Focus Room</button>
+                    <button class="nav-tab" onclick="switchTab('train')"><span class="icon">🚆</span> Train Buddies</button>
+                  <button class="nav-tab" onclick="switchTab('notes')"><span class="icon">📚</span> Notes &amp; Papers</button>
+                   <button class="nav-tab" onclick="switchTab('alumni')"><span class="icon">🎓</span> Alumni</button> 
+                  <button class="nav-tab logout" onclick="handleLogout()"><span class="icon">🚪</span> Logout</button>
                 </nav>
             </div>
         </header>
 
-        <!-- CONTENT -->
         <main class="content">
-            <!-- Q&A TAB -->
+           <section id="alumni-tab" class="tab-content">
+    <div class="groups-header">
+        <h2>Alumni Mentors</h2>
+        <p class="subtitle">Seniors who have graduated and want to help with placements and careers.</p>
+    </div>
+    <div class="controls-panel">
+        <div class="search-wrapper">
+            <input type="text" id="a-search" placeholder="Search by name, company or role..." class="search-input" onkeyup="renderAlumni()">
+            <span class="search-icon">🔍</span>
+        </div>
+        <select id="a-filter" class="filter-dropdown" onchange="renderAlumni()">
+            <option value="">All Help Types</option>
+            <option value="Mock Interview">Mock Interview</option>
+            <option value="Resume Review">Resume Review</option>
+            <option value="Referral">Referral</option>
+            <option value="Career Guidance">Career Guidance</option>
+        </select>
+    </div>
+    <button class="cta-btn" onclick="toggleAlumniForm()"><span>+</span> Register as Alumni Mentor</button>
+    <form id="alumni-form" class="form-container hidden" onsubmit="postAlumni(event)">
+        <h3>Alumni Mentor Profile</h3>
+        <input type="text" id="a-company" placeholder="Company (e.g., TCS, L&amp;T, Infosys)" required class="form-input">
+        <input type="text" id="a-role" placeholder="Your role (e.g., Software Engineer)" required class="form-input">
+        <input type="number" id="a-grad" placeholder="Graduation year (e.g., 2023)" min="1990" max="2026" required class="form-input">
+        <select id="a-branch" class="form-input" required>
+            <option value="">Branch</option>
+            <option value="Computer">Computer</option>
+            <option value="IT">IT</option>
+            <option value="EXTC">EXTC</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="Other">Other</option>
+        </select>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:14px">
+            <label><input type="checkbox" class="a-help" value="Mock Interview"> Mock Interview</label>
+            <label><input type="checkbox" class="a-help" value="Resume Review"> Resume Review</label>
+            <label><input type="checkbox" class="a-help" value="Referral"> Referral</label>
+            <label><input type="checkbox" class="a-help" value="Career Guidance"> Career Guidance</label>
+        </div>
+        <input type="text" id="a-linkedin" placeholder="LinkedIn profile link (optional)" class="form-input">
+        <textarea id="a-bio" placeholder="Short intro: how can you help juniors?" class="form-textarea" required></textarea>
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Register</button>
+            <button type="button" class="btn-secondary" onclick="toggleAlumniForm()">Cancel</button>
+        </div>
+    </form>
+    <div id="alumni-list" class="marketplace-grid"></div>
+</section>
+            <section id="focus-tab" class="tab-content">
+    <div class="groups-header">
+        <h2>Focus Room</h2>
+        <p class="subtitle">Study together. Start a timer and see who else is focusing right now.</p>
+    </div>
+    <div class="form-container" style="align-items:center;text-align:center">
+        <div id="f-clock" style="font-size:64px;font-weight:800;color:var(--y)">25:00</div>
+        <select id="f-subject" class="form-input">
+            <option value="">Subject</option>
+            <option value="Maths-I">Maths-I</option>
+            <option value="C Programming">C Programming</option>
+            <option value="DSA">DSA</option>
+            <option value="Engineering Graphics">Engineering Graphics</option>
+        </select>
+        <select id="f-mins" class="form-input" onchange="renderFocus()">
+            <option value="25">25 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="50">50 minutes</option>
+            <option value="1">1 minute (demo)</option>
+        </select>
+        <div class="form-actions">
+            <button type="button" class="btn-primary" onclick="startFocus()">Start Focus</button>
+            <button type="button" class="btn-secondary" onclick="stopFocus()">Stop</button>
+        </div>
+    </div>
+    <h3 style="color:var(--y);margin:10px 0">Studying now</h3>
+    <div id="focus-live" class="marketplace-grid"></div>
+    <h3 style="color:var(--y);margin:24px 0 10px">Focus leaderboard</h3>
+    <div id="focus-board"></div>
+</section>
             <section id="qa-tab" class="tab-content active">
                 <div class="qa-header">
                     <h2>Anonymous Q&A</h2>
                     <p class="subtitle">Ask anything. Learn from seniors. Help your juniors.</p>
                 </div>
-
-                <!-- FILTERS & SEARCH -->
                 <div class="controls-panel">
                     <div class="search-wrapper">
-                        <input 
-                            type="text" 
-                            id="qa-search" 
-                            placeholder="Search by keyword..." 
-                            class="search-input"
-                            onkeyup="filterQA()"
-                        >
+                        <input type="text" id="qa-search" placeholder="Search by keyword..." class="search-input" onkeyup="filterQA()">
                         <span class="search-icon">🔍</span>
                     </div>
                     <select id="subject-filter" class="filter-dropdown" onchange="filterQA()">
@@ -83,28 +146,11 @@
                         <option value="Engineering Graphics">Engineering Graphics</option>
                     </select>
                 </div>
-
-                <!-- POST QUESTION BUTTON -->
-                <button class="cta-btn" onclick="toggleQAForm()">
-                    <span>+</span> Ask Question Anonymously
-                </button>
-
-                <!-- QUESTION FORM -->
+                <button class="cta-btn" onclick="toggleQAForm()"><span>+</span> Ask Question Anonymously</button>
                 <form id="qa-form" class="form-container hidden" onsubmit="postQuestion(event)">
                     <h3>Your Question</h3>
-                    <input 
-                        type="text" 
-                        id="q-title" 
-                        placeholder="What's your doubt?" 
-                        required 
-                        class="form-input"
-                    >
-                    <textarea 
-                        id="q-body" 
-                        placeholder="Provide more details..." 
-                        class="form-textarea"
-                        required
-                    ></textarea>
+                    <input type="text" id="q-title" placeholder="What's your doubt?" required class="form-input">
+                    <textarea id="q-body" placeholder="Provide more details..." class="form-textarea" required></textarea>
                     <select id="q-subject" class="form-input" required>
                         <option value="">Subject</option>
                         <option value="Maths-I">Maths-I</option>
@@ -117,34 +163,18 @@
                         <button type="button" class="btn-secondary" onclick="toggleQAForm()">Cancel</button>
                     </div>
                 </form>
-
-                <!-- QUESTIONS LIST -->
-                <div id="qa-list" class="posts-grid">
-                    <!-- Posts rendered here -->
-                </div>
+                <div id="qa-list" class="posts-grid"></div>
             </section>
 
-            <!-- MARKETPLACE TAB -->
             <section id="marketplace-tab" class="tab-content">
                 <div class="marketplace-header">
                     <h2>Resource Marketplace</h2>
-                    <p class="subtitle">Buy, sell, donate textbooks & resources. Save ₹5000+/year.</p>
+                    <p class="subtitle">Buy, sell, donate textbooks &amp; resources. Save ₹5000+/year.</p>
                 </div>
-
-                <button class="cta-btn" onclick="toggleMarketplaceForm()">
-                    <span>+</span> List Your Item
-                </button>
-
-                <!-- MARKETPLACE FORM -->
+                <button class="cta-btn" onclick="toggleMarketplaceForm()"><span>+</span> List Your Item</button>
                 <form id="marketplace-form" class="form-container hidden" onsubmit="postMarketplace(event)">
                     <h3>Sell or Donate</h3>
-                    <input 
-                        type="text" 
-                        id="m-name" 
-                        placeholder="Item name (e.g., C Programming Book)" 
-                        required 
-                        class="form-input"
-                    >
+                    <input type="text" id="m-name" placeholder="Item name (e.g., C Programming Book)" required class="form-input">
                     <select id="m-category" class="form-input" required>
                         <option value="">Category</option>
                         <option value="Textbooks">Textbooks</option>
@@ -152,33 +182,126 @@
                         <option value="Notes">Study Notes</option>
                         <option value="Lab Equipment">Lab Equipment</option>
                     </select>
-                    <input 
-                        type="number" 
-                        id="m-price" 
-                        placeholder="Price (₹) - Leave 0 for donation" 
-                        required 
-                        class="form-input"
-                    >
-                    <textarea 
-                        id="m-desc" 
-                        placeholder="Condition, edition, details..." 
-                        class="form-textarea"
-                        required
-                    ></textarea>
+                    <input type="number" id="m-price" placeholder="Price (₹) - Leave 0 for donation" required class="form-input">
+                    <input type="tel" id="m-phone" placeholder="WhatsApp number (optional)" class="form-input">
+                    <textarea id="m-desc" placeholder="Condition, edition, details..." class="form-textarea" required></textarea>
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">List Item</button>
                         <button type="button" class="btn-secondary" onclick="toggleMarketplaceForm()">Cancel</button>
                     </div>
                 </form>
-
-                <!-- MARKETPLACE ITEMS -->
-                <div id="marketplace-list" class="marketplace-grid">
-                    <!-- Items rendered here -->
-                </div>
+                <div id="marketplace-list" class="marketplace-grid"></div>
             </section>
 
-            <!-- PROFILE TAB -->
-            <section id="profile-tab" class="tab-content">
+            <section id="groups-tab" class="tab-content">
+                <div class="groups-header">
+                    <h2>Study Groups</h2>
+                    <p class="subtitle">Find study partners for your subject. Create a group or join one.</p>
+                </div>
+                <button class="cta-btn" onclick="toggleGroupForm()"><span>+</span> Create Study Group</button>
+                <form id="group-form" class="form-container hidden" onsubmit="postGroup(event)">
+                    <h3>New Study Group</h3>
+                    <input type="text" id="g-name" placeholder="Group name (e.g., DSA late-night revision)" required class="form-input">
+                    <select id="g-subject" class="form-input" required>
+                        <option value="">Subject</option>
+                        <option value="Maths-I">Maths-I</option>
+                        <option value="C Programming">C Programming</option>
+                        <option value="DSA">DSA</option>
+                        <option value="Engineering Graphics">Engineering Graphics</option>
+                    </select>
+                    <input type="text" id="g-when" placeholder="When and where (e.g., Sat 4 PM, Library)" required class="form-input">
+                    <input type="number" id="g-max" placeholder="Max members (e.g., 6)" min="2" max="30" required class="form-input">
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Create</button>
+                        <button type="button" class="btn-secondary" onclick="toggleGroupForm()">Cancel</button>
+                    </div>
+                </form>
+                <div id="groups-list" class="marketplace-grid"></div>
+            </section>
+
+            <section id="train-tab" class="tab-content">
+    <div class="groups-header">
+        <h2>Train Buddies</h2>
+        <p class="subtitle">Commute to VESIT together. Find students travelling on your train.</p>
+    </div>
+    <div class="controls-panel">
+        <div class="search-wrapper">
+            <input type="text" id="t-search" placeholder="Search your station (e.g., Kurla)..." class="search-input" onkeyup="renderTrains()">
+            <span class="search-icon">🔍</span>
+        </div>
+    </div>
+    <button class="cta-btn" onclick="toggleTrainForm()"><span>+</span> Post My Commute</button>
+    <form id="train-form" class="form-container hidden" onsubmit="postTrain(event)">
+        <h3>My Daily Commute</h3>
+        <input type="text" id="t-from" list="stations" placeholder="Boarding station (e.g., Kalyan)" required class="form-input">
+        <datalist id="stations">
+            <option value="Kalyan"><option value="Ulhasnagar"><option value="Ambernath"><option value="Dombivli">
+            <option value="Thane"><option value="Mulund"><option value="Ghatkopar"><option value="Kurla">
+            <option value="Dadar"><option value="Vashi"><option value="Panvel"><option value="Mankhurd">
+            <option value="Govandi"><option value="Andheri"><option value="Borivali"><option value="Virar">
+        </datalist>
+        <input type="time" id="t-time" required class="form-input">
+        <select id="t-days" class="form-input" required>
+            <option value="Mon-Fri">Mon - Fri</option>
+            <option value="Mon-Sat">Mon - Sat</option>
+            <option value="Alternate days">Alternate days</option>
+        </select>
+        <input type="text" id="t-point" placeholder="Meeting point (e.g., Platform 2, 3rd coach)" required class="form-input">
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Post</button>
+            <button type="button" class="btn-secondary" onclick="toggleTrainForm()">Cancel</button>
+        </div>
+    </form>
+    <div id="train-list" class="marketplace-grid"></div>
+</section>
+  <section id="notes-tab" class="tab-content">
+    <div class="groups-header">
+        <h2>Notes &amp; Papers</h2>
+        <p class="subtitle">Share and find last year's question papers, notes and lab manuals.</p>
+    </div>
+    <div class="controls-panel">
+        <div class="search-wrapper">
+            <input type="text" id="n-search" placeholder="Search notes or papers..." class="search-input" onkeyup="renderNotes()">
+            <span class="search-icon">🔍</span>
+        </div>
+        <select id="n-filter" class="filter-dropdown" onchange="renderNotes()">
+            <option value="">All Types</option>
+            <option value="Question Paper">Question Papers</option>
+            <option value="Notes">Notes</option>
+            <option value="Lab Manual">Lab Manuals</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+    <button class="cta-btn" onclick="toggleNoteForm()"><span>+</span> Share Notes / Paper</button>
+    <form id="note-form" class="form-container hidden" onsubmit="postNote(event)">
+        <h3>Share a Resource</h3>
+        <input type="text" id="n-title" placeholder="Title (e.g., Maths-I End Sem Paper)" required class="form-input">
+        <select id="n-subject" class="form-input" required>
+            <option value="">Subject</option>
+            <option value="Maths-I">Maths-I</option>
+            <option value="C Programming">C Programming</option>
+            <option value="DSA">DSA</option>
+            <option value="Engineering Graphics">Engineering Graphics</option>
+            <option value="Other">Other</option>
+        </select>
+        <select id="n-type" class="form-input" required>
+            <option value="Question Paper">Question Paper</option>
+            <option value="Notes">Notes</option>
+            <option value="Lab Manual">Lab Manual</option>
+            <option value="Other">Other</option>
+        </select>
+        <input type="text" id="n-year" placeholder="Year / exam (e.g., Dec 2025, Sem 1)" required class="form-input">
+        <input type="text" id="n-link" placeholder="Google Drive / PDF link (optional if attaching a file)" class="form-input">
+        <input type="file" id="n-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="form-input">
+        <p class="meta">Attach a file under 700 KB, or paste a link for bigger files.</p>
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Share</button>
+            <button type="button" class="btn-secondary" onclick="toggleNoteForm()">Cancel</button>
+        </div>
+    </form>
+    <div id="notes-list" class="marketplace-grid"></div>
+</section>          
+<section id="profile-tab" class="tab-content">
                 <div class="profile-container">
                     <div class="profile-card">
                         <div class="profile-header">
@@ -190,29 +313,16 @@
                             </div>
                         </div>
                         <div class="profile-stats">
-                            <div class="stat-box">
-                                <h3 id="stat-questions">0</h3>
-                                <p>Questions</p>
-                            </div>
-                            <div class="stat-box">
-                                <h3 id="stat-items">0</h3>
-                                <p>Items Listed</p>
-                            </div>
-                            <div class="stat-box">
-                                <h3 id="stat-upvotes">0</h3>
-                                <p>Upvotes</p>
-                            </div>
-                            <div class="stat-box">
-                                <h3 id="stat-reputation">⭐</h3>
-                                <p>Reputation</p>
-                            </div>
+                            <div class="stat-box"><h3 id="stat-questions">0</h3><p>Questions</p></div>
+                            <div class="stat-box"><h3 id="stat-items">0</h3><p>Items Listed</p></div>
+                            <div class="stat-box"><h3 id="stat-upvotes">0</h3><p>Upvotes</p></div>
+                            <div class="stat-box"><h3 id="stat-reputation">⭐</h3><p>Reputation</p></div>
                         </div>
                     </div>
                 </div>
             </section>
         </main>
 
-        <!-- FOOTER -->
         <footer class="footer">
             <p>CampusConnect © 2026 | Built for VESIT Students | Force Awakens 1.0</p>
         </footer>
